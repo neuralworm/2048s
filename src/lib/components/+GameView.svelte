@@ -20,6 +20,7 @@
     import { onMount } from "svelte";
     import { fade, slide } from "svelte/transition";
     import CellView from "./+CellView.svelte";
+    import { swipe } from 'svelte-gestures';
 
     const defaultGameboard: GameBoard = [
         [null, null, null, null],
@@ -33,13 +34,14 @@
     // PREVIOUS TURN
     let previousTurn: GameBoard | null = null;
     // SCORE
-    let score = 0;
+    let score: number = 0;
     // TURN
-    let turn = 0;
-
+    let turn: number = 0;
+    let canSwipe: boolean = true
     // EVENTS
     const keys = (e: KeyboardEvent) => {
-        // console.log(e)
+        // if(!canSwipe) return
+        e.stopImmediatePropagation()
         e.preventDefault();
         switch (e.key) {
             case "ArrowUp":
@@ -71,6 +73,7 @@
     });
     // RECEIVE CONTROL INPUT AND CALL CORRECT \METHOD
     const startTurn = (direction: string) => {
+        // canSwipe = false
         // SET HISTORY
         previousTurn = getCurrentBoardCopy();
 
@@ -118,7 +121,7 @@
     const initializeNewGame = () => {
         // RESET
         gameboard = deepCopy(defaultGameboard)
-        document.getElementById('active-cells')!.innerHTML = ""
+        clearBoardDom()
 
 
         // SETUP
@@ -141,7 +144,9 @@
             if(cell) addCellToDOM(cell)
         })
     }
-
+    const clearBoardDom = () => {
+        document.getElementById('active-cells')!.innerHTML = ""
+    }
     // DIRECTIONS
     type Move = [Cell, Coord]
     const swipeDown = (boardCopy: any[]) => {
@@ -354,10 +359,18 @@
             checkForMoves(newGameBoard);
         }
         saveState(score, gameboard, turn);
+        canSwipe = true
     };
     const undoTurn =() => {
         if(previousTurn) gameboard = previousTurn
         previousTurn = null
+        clearBoardDom()
+        gameboard.flat().forEach((cell: Cell|null)=>{
+            if(cell){
+                addCellToDOM(cell)
+            }
+        })
+        
     }
     const isBoardFull = (newBoard: any[][]): boolean => {
         let empties: Coord[] = [];
@@ -396,17 +409,20 @@
 
 
     // DOM MANIPULATION
-    const addCellToDOM = (cell: Cell) => {
+    const addCellToDOM = (cell: Cell, value: number = 2) => {
         // CREATE
         const newCell = document.createElement('div')
-        newCell.classList.add("flex", "absolute", "flex-row", "items-center", "text-3xl", "font-bold", "justify-center", "w-1/4", "h-1/4", "p-1", "transition-transform", "enter")
+        newCell.classList.add("flex", "absolute", "flex-row", "items-center", "text-3xl", "font-bold", "justify-center", "rounded-sm", "w-1/4", "h-1/4", "p-[10px]", "transition-transform", "enter", "select-none")
         newCell.id = `cell-${cell.id}`
         newCell.dataset.cell = `cell-${cell.id}`
         newCell.dataset.cellPosition = `${cell.coord}`
-        newCell.innerHTML = cell.value.toString()
         console.log(PositionMap.get(JSON.stringify(cell.coord)))
         // SET FIRST POSITION
         newCell.classList.add(PositionMap.get(JSON.stringify(cell.coord))!)
+        // SET STYLE
+        newCell.classList.add(`block-${cell.value}`)
+        // INNER CONTENT
+        newCell.innerHTML = `<div class="inner-block flex items-center justify-center rounded-md">${cell.value.toString()}</div>`
         // MOUNT
         document.getElementById("active-cells")?.appendChild(newCell)
     }
@@ -440,7 +456,25 @@
         el?.remove()
     }
 
+    const swipeHandler = (event: any) => {
+        switch (event.detail.direction) {
+            case "bottom":
+                startTurn("DOWN")
+                break;
+                case "top":
+                startTurn("UP")
+                break;
+                case "left":
+                startTurn("LEFT")
+                break;
+                case "right":
+                startTurn("RIGHT")
+                break;
+            default:
+                break;
+        }
 
+    }
 
 </script>
 
@@ -475,15 +509,17 @@
 </div>
 
 <!-- GAMEBOARD -->
+<!-- @ts-ignore -->
 <div
     id="game-board-wrapper"
-    class="w-64 h-64 bg-neutral-700 rounded-sm flex flex-row relative"
+    class="w-64 h-64 border-4 select-none border-neutral-500 bg-neutral-700 box-content rounded-md flex flex-row relative overflow-hidden"
+    use:swipe={{ timeframe: 300, minSwipeDistance: 60 }} on:swipe={swipeHandler}
 >
     {#each gameboard as block}
         <div class="flex flex-col basis-1/4 relative">
             {#each block as cell}
                 <div
-                    class="flex flex-row items-center justify-center border-2 rounded-sm basis-1/4 font-bold text-neutral-600"
+                    class="flex flex-row items-center justify-center border-4  border-neutral-500 basis-1/4 font-bold text-neutral-600"
                 />
             {/each}
         </div>
