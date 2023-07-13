@@ -117,26 +117,26 @@
 }
 
 .block-512>div {
-    background: rgb(102, 216, 60);
-    color: white;
+    background: rgb(204, 237, 38);
+    color: black;
     font-size: 1.5rem;
 }
 
-.block-1024>div {
-    background: rgb(102, 216, 60);
-    color: white;
+.block-1024 >div {
+    background: rgb(242, 177, 38);
+    color: black;
     font-size: 1rem;
 }
 
 .block-2048>div {
-    background: rgb(102, 216, 60);
+    background: rgb(238, 54, 51);
     color: white;
     font-size: 1rem;
 }
 
 .block-4096>div {
-    background: rgb(102, 216, 60);
-    color: white;
+    background: rgb(225, 34, 200);
+    color: black;
     font-size: 1rem;
 }
 
