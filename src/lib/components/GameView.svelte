@@ -9,18 +9,19 @@
         boardRowsToCols,
         combineCells,
         type Coord,
-        checkForMoves,
         saveState,
         type GameState,
         deepCopy,
         findHighest,
         loadState,
+        areMovesAvailable,
     } from "$lib";
     import type { GameBoard } from "$lib/types/GameBoard";
     import { onMount } from "svelte";
     import { fade, slide } from "svelte/transition";
-    import CellView from "./+CellView.svelte";
+    import CellView from "./CellView.svelte";
     import { swipe } from "svelte-gestures";
+    import EndGameView from "./EndGameView.svelte";
 
     const defaultGameboard: GameBoard = [
         [null, null, null, null],
@@ -121,7 +122,7 @@
         // RESET
         gameboard = deepCopy(defaultGameboard);
         clearBoardDom();
-
+        gameover = false
         // SETUP
         let first: Coord = getRandBoardBlock();
         let second: Coord = getRandBoardBlock();
@@ -354,7 +355,12 @@
         addNewCellToGame(rand);
         // CHECK IF BOARD FULL
         if (isBoardFull(newGameBoard)) {
-            checkForMoves(newGameBoard);
+            if(!areMovesAvailable(newGameBoard)){
+                // END GAME
+                console.log("GAME OVER")
+                gameover = true
+                // SAVE CURRENT GAME STATE TO PREVOUS IN LOCALSTORAGE
+            }
         }
         saveState(score, gameboard, turn);
         canSwipe = true;
@@ -391,7 +397,7 @@
         }
         return empties[Math.floor(Math.random() * empties.length)];
     };
-
+    let gameover: boolean = false
     // CREATE/MODIFY/DELETE
     const addNewCellToGame = (coord: Coord): Cell => {
         // CREATE OBJ
@@ -556,7 +562,12 @@
     class="w-72 h-72 border-4 select-none border-neutral-500 bg-neutral-700 box-content rounded-md flex flex-row relative overflow-hidden"
     use:swipe={{ timeframe: 300, minSwipeDistance: 60 }}
     on:swipe={swipeHandler}
->
+>   
+    <!-- GAME OVER OVERLAY -->
+    {#if gameover}
+        <EndGameView createNewGame={initializeNewGame}></EndGameView>
+    {/if}
+    <!-- GRID -->
     {#each gameboard as block}
         <div class="flex flex-col basis-1/4 relative">
             {#each block as cell}

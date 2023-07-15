@@ -49,13 +49,33 @@ export const canIMoveTo = (from: Cell, to: Cell|null|Cell[]): boolean => {
     if(to.value == from.value) return true
     return false
 }
-export const checkForMoves = (board: any[][]): boolean => {
 
-    return true
-}
 export const deepCopy = (board: GameBoard) => {
     return JSON.parse(JSON.stringify([[...board[0]], [...board[1]], [...board[2]], ...[board[3]]]))
 }
+
+// GAME STATE
+export const areMovesAvailable = (board: GameBoard) => {
+    const rows = board.length;
+    const cols = board[0].length;
+  
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        const currentCell = board[i][j]
+        if(currentCell == null) continue
+        const value = currentCell.value
+        if (
+          (i > 0 && board[i - 1][j]?.value === value) ||
+          (i < rows - 1 && board[i + 1][j]?.value === value) ||
+          (j > 0 && board[i][j - 1]?.value === value) ||
+          (j < cols - 1 && board[i][j + 1]?.value === value)
+        ) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 
 // PERSISTENCE
 export interface GameState {
