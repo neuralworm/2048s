@@ -15,6 +15,7 @@
         findHighest,
         loadState,
         areMovesAvailable,
+        saveToHistory,
     } from "$lib";
     import type { GameBoard } from "$lib/types/GameBoard";
     import { onMount } from "svelte";
@@ -123,6 +124,8 @@
         gameboard = deepCopy(defaultGameboard);
         clearBoardDom();
         gameover = false
+        previousTurn = null
+        
         // SETUP
         let first: Coord = getRandBoardBlock();
         let second: Coord = getRandBoardBlock();
@@ -360,6 +363,7 @@
                 console.log("GAME OVER")
                 gameover = true
                 // SAVE CURRENT GAME STATE TO PREVOUS IN LOCALSTORAGE
+                saveToHistory()
             }
         }
         saveState(score, gameboard, turn);

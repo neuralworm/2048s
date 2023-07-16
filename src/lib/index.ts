@@ -102,6 +102,18 @@ export const loadState = (): GameState|null => {
     if(!saveString) return null
     return JSON.parse(saveString)
 }
+export const saveToHistory = () => {
+    let historyString: string|null = localStorage.getItem("history")
+    let history: GameState[]
+    if(!historyString) history = []
+    else history = JSON.parse(historyString)
+    let currentGame = localStorage.getItem("currentGame")
+    if(!currentGame) return
+    history.unshift(JSON.parse(currentGame))
+    if(history.length > 50) history.pop()
+    localStorage.setItem('history', JSON.stringify(history)) 
+
+}
 // STYLE
 export const BoxPosition = (coord: Coord): string => {
     let left = coord[0] == 0 ? "0" : (coord[0] == 1 ? "1/4" : (coord[0] == 2 ? "1/2" : "3/4"))
