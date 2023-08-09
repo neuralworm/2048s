@@ -30,6 +30,7 @@
 	"dependencies": {
 		"@react2svelte/swipeable": "^0.1.4",
 		"@types/uuid": "^9.0.2",
+		"@vercel/analytics": "^1.0.1",
 		"svelte-gestures": "^1.5.2",
 		"uuid": "^9.0.0"
 	}
